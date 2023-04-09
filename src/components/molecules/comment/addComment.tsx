@@ -11,7 +11,7 @@ interface Props {
 const AddComment = (props: Props) => {
   const {placeholder, onSubmitComment} = props;
 
-  const [text, onChangeText] = React.useState('');
+  const [text, setText] = React.useState('');
 
   return (
     <Surface elevation={0} style={styles.container}>
@@ -27,7 +27,7 @@ const AddComment = (props: Props) => {
           />
         }
         mode="outlined"
-        onChangeText={onChangeText}
+        onChangeText={setText}
         value={text}
       />
     </Surface>

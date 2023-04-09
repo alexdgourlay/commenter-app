@@ -1,31 +1,41 @@
-import React, {useState} from 'react';
-import {TextInput} from 'react-native-paper';
+import React, {useContext, useEffect, useState} from 'react';
+import {TextInput as PaperTextInput} from 'react-native-paper';
+import {FocusArea, WebContext} from '../../../../context/web/webContext';
+import {condense} from '../../../../lib/url/url';
 
-interface Props {
-  url: string;
-  onSubmitUrl: (url: string) => void;
-}
+const AddressInput = () => {
+  const {url, navigate, focusedArea, focus} = useContext(WebContext);
 
-const AddressInput = (props: Props) => {
-  const {url, onSubmitUrl} = props;
+  // The value to show inside the input component i.e. the url.
+  const [inputValue, setInputValue] = useState(url);
 
-  const [currentUrl, setCurrentUrl] = useState(url);
+  const isFocused = focusedArea === FocusArea.Utility;
+
+  useEffect(() => {
+    setInputValue(url);
+  }, [url]);
 
   return (
     <>
-      <TextInput
+      <PaperTextInput
         dense
         mode="outlined"
-        value={currentUrl}
+        value={isFocused ? inputValue : condense(inputValue)}
         autoComplete="off"
         autoCorrect={false}
         spellCheck={false}
         keyboardType="web-search"
         onChangeText={text => {
-          setCurrentUrl(text);
+          setInputValue(text);
         }}
         onSubmitEditing={event => {
-          onSubmitUrl(event.nativeEvent.text);
+          navigate(event.nativeEvent.text);
+        }}
+        onFocus={() => {
+          focus(FocusArea.Utility);
+        }}
+        onBlur={() => {
+          focus(FocusArea.WebView);
         }}
       />
     </>

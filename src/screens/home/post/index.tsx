@@ -22,9 +22,9 @@ const GET_POST_SCREEN_DATA = gql(`
 `);
 
 const CREATE_COMMENT = gql(`
-  mutation CreateComment($postId: String!, $contentText: String!) {
+  mutation CreateComment($postId: ID!, $contentText: String!) {
       createComment(postId: $postId, contentText: $contentText) {
-      id
+      ...CommentFields
     }
 }
 `);
@@ -32,7 +32,7 @@ const CREATE_COMMENT = gql(`
 type Props = NativeStackScreenProps<HomeNavParamList, Routes.Post>;
 
 const Post = (props: Props) => {
-  const {route, navigation} = props;
+  const {route} = props;
   const {postId} = route.params;
 
   const {data} = useQuery(GET_POST_SCREEN_DATA, {
@@ -41,7 +41,26 @@ const Post = (props: Props) => {
     },
   });
 
-  const [createComment] = useMutation(CREATE_COMMENT);
+  const [createComment] = useMutation(CREATE_COMMENT, {
+    update(cache, {data}) {
+      const newComment = data?.createComment;
+
+      const existingPostScreenData = cache.readQuery({
+        query: GET_POST_SCREEN_DATA,
+      });
+
+      if (existingPostScreenData?.comments && newComment) {
+        // Add newly made comment to existing comments.
+        cache.writeQuery({
+          query: GET_POST_SCREEN_DATA,
+          data: {
+            ...existingPostScreenData,
+            comments: [...existingPostScreenData.comments, newComment],
+          },
+        });
+      }
+    },
+  });
 
   return (
     <Surface elevation={0}>

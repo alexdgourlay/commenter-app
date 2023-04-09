@@ -7,33 +7,55 @@ import {gql} from '../../../__generated__/gql';
 import {Text, IconButton} from '../../atoms';
 import {Surface} from '../../atoms';
 import HeroScroll from './heroScroll';
+import {condense} from '../../../lib/url/url';
 
 interface Props {
   post: PostFieldsFragment;
   onCommentsPress?: () => void;
+  onLikePress?: () => void;
   onDomainPress?: () => void;
   card?: boolean;
 }
 
 const Post = (props: Props) => {
-  const {post, onCommentsPress, onDomainPress, card = true} = props;
+  const {
+    post,
+    onCommentsPress,
+    onLikePress,
+    onDomainPress,
+    card = true,
+  } = props;
   return (
     <Surface elevation={card ? 5 : 0} style={card ? styles.card : undefined}>
       <View style={card ? styles.content : undefined}>
-        <HeroScroll />
+        {post.previewImage && (
+          <HeroScroll
+            data={[
+              {
+                id: '1',
+                type: 'Image',
+                string: post.previewImage,
+              },
+            ]}
+          />
+        )}
 
         <View style={styles.lowerContainer}>
           <Pressable
             style={styles.domainContainer}
             onPress={() => onDomainPress?.()}>
-            <Image
-              style={styles.favicon}
-              source={{
-                uri: 'https://m.files.bbci.co.uk/modules/bbc-morph-news-waf-page-meta/5.3.0/apple-touch-icon.png',
-              }}
-            />
+            {post.webAddress?.domain?.icon && (
+              <Image
+                style={styles.favicon}
+                source={{
+                  uri: post.webAddress.domain.icon,
+                }}
+              />
+            )}
             {post.webAddress?.domain && (
-              <Text variant="bodyMedium">{post.webAddress.domain.domain}</Text>
+              <Text variant="bodyMedium">
+                {condense(post.webAddress.domain.domain)}
+              </Text>
             )}
           </Pressable>
           <Text variant="bodyMedium">{post.title}</Text>
@@ -46,11 +68,20 @@ const Post = (props: Props) => {
                 size="S"
                 onPress={() => onCommentsPress?.()}
               />
-              <Text variant="labelMedium">{post._count?.comments || 0}</Text>
+              {post._count?.comments ? (
+                <Text variant="labelMedium">{post._count.comments}</Text>
+              ) : undefined}
             </View>
             <View style={styles.action}>
-              <IconButton style={styles.icon} icon="heart" size="S" />
-              <Text variant="labelMedium">{1}</Text>
+              <IconButton
+                style={styles.icon}
+                icon="heart"
+                size="S"
+                onPress={() => onLikePress?.()}
+              />
+              {post._count?.likes ? (
+                <Text variant="labelMedium">{post._count?.likes}</Text>
+              ) : undefined}
             </View>
             <IconButton style={styles.icon} icon="compass" size="S" />
             <IconButton style={styles.icon} icon="share" size="S" />
@@ -66,14 +97,18 @@ Post.fragments = {
   fragment PostFields on Post {
     id
     title
+    previewImage
     webAddress {
       hash
       domain {
         domain
+        icon
       }
     }
+    liked
     _count {
       comments
+      likes
     }
 }
 `),

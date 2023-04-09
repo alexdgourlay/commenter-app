@@ -9,7 +9,7 @@ interface FeedItem {
 }
 
 interface Props<T> {
-  style: SurfaceProps['style'];
+  style?: SurfaceProps['style'];
   data: T[];
   renderItem: (item: T) => ReactElement;
   isLoading?: boolean;

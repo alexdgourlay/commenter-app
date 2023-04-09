@@ -1,6 +1,9 @@
 module.exports = {
   root: true,
   extends: '@react-native-community',
+  plugins: [
+    "eslint-plugin-tsdoc"
+  ],
   overrides: [
     {
       files: ['*.graphql'],

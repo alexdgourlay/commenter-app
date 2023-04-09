@@ -1,36 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext} from 'react';
 import WebView from 'react-native-webview';
 import AddressInput from './navigation/addressInput';
+import {WebContext, defaultValue} from '../../../context/web/webContext';
 
-const initialUrl = 'https://google.com';
-
-interface Props {
-  onUrlUpdate?: (url: string) => void;
-}
-
-const Web = (props: Props) => {
-  const {onUrlUpdate} = props;
-
-  const [currentUrl, setCurrentUrl] = useState(initialUrl);
-
-  const updateUrl = (url: string) => {
-    setCurrentUrl(url);
-    onUrlUpdate?.(url);
-  };
+const Web = () => {
+  const {navigate} = useContext(WebContext);
 
   return (
     <>
-      <AddressInput
-        url={currentUrl}
-        onSubmitUrl={url => {
-          updateUrl(url);
-        }}
-      />
+      <AddressInput />
       <WebView
         onNavigationStateChange={event => {
-          updateUrl(event.url);
+          navigate(event.url);
         }}
-        source={{uri: currentUrl}}
+        source={{uri: defaultValue.url}}
       />
     </>
   );

@@ -8,23 +8,13 @@ type ItemData = {
   string: string;
 };
 
-const data: ItemData[] = [
-  {
-    id: '1',
-    type: 'Image',
-    string:
-      'https://ichef.bbci.co.uk/news/976/cpsprodpb/9C16/production/_129185993_gettyimages-1249830037.jpg.webp',
-  },
-  {
-    id: '2',
-    type: 'Text',
-    string: 'What were they thinking??',
-  },
-];
-
-interface Props {}
+interface Props {
+  data: ItemData[];
+}
 
 const HeroScroll = (props: Props) => {
+  const {data} = props;
+
   const renderItem = ({item}: {item: ItemData}) => {
     switch (item.type) {
       case 'Image':
