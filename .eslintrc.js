@@ -1,8 +1,8 @@
 module.exports = {
   root: true,
-  extends: '@react-native-community',
+  extends: ['@react-native-community'],
   plugins: [
-    "eslint-plugin-tsdoc"
+    "eslint-plugin-tsdoc",
   ],
   overrides: [
     {

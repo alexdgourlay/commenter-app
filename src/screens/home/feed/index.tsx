@@ -5,7 +5,8 @@ import Feed from '../../../components/organisms/feed/feed';
 import {gql} from '../../../__generated__';
 import {useMutation, useQuery} from '@apollo/client';
 import Post from '../../../components/molecules/post/post';
-import {Post as PostType} from '../../../__generated__/graphql';
+import {Domain, Post as PostType} from '../../../__generated__/graphql';
+import Actions from '../../../components/molecules/post/actions/actions';
 
 type Props = NativeStackScreenProps<HomeNavParamList, 'Feed'>;
 
@@ -46,43 +47,82 @@ export default (props: Props) => {
   const [unlikePost] = useMutation(UNLIKE_POST);
 
   const handleLikePress = useCallback(
-    (postId: PostType['id'], liked: PostType['liked']) => {
-      const likeOperation = liked ? unlikePost : likePost;
-      likeOperation({
-        variables: {
-          postId,
+    (post: PostType) => {
+      const optimisticPostResponse = {
+        post: {
+          ...post,
+          liked: !post.liked,
         },
+      };
+
+      if (!post.liked) {
+        likePost({
+          variables: {
+            postId: post.id,
+          },
+          optimisticResponse: {
+            likePost: {
+              ...optimisticPostResponse,
+            },
+          },
+        });
+      } else {
+        unlikePost({
+          variables: {
+            postId: post.id,
+          },
+          optimisticResponse: {
+            unlikePost: {
+              ...optimisticPostResponse,
+            },
+          },
+        });
+      }
+    },
+    [likePost, unlikePost],
+  );
+
+  const handleCommentsPress = useCallback(
+    (postId: PostType['id']) => {
+      navigation.navigate(Routes.Post, {
+        postId,
       });
     },
-    [],
+    [navigation],
+  );
+
+  const handleDomainPress = useCallback(
+    (domain: Domain['domain']) => {
+      navigation.navigate(Routes.Domain, {
+        domain,
+      });
+    },
+    [navigation],
   );
 
   return (
-    <>
-      <Feed
-        isLoading={loading}
-        onRefresh={refetch}
-        data={postsData?.posts || []}
-        renderItem={item => (
-          <Post
-            post={item}
-            onCommentsPress={() => {
-              navigation.navigate(Routes.Post, {
-                postId: item.id,
-              });
-            }}
-            onLikePress={() => handleLikePress(item.id, item.liked)}
-            onDomainPress={() => {
-              const domain = item.webAddress?.domain?.domain;
-              if (domain !== undefined) {
-                navigation.navigate(Routes.Domain, {
-                  domain,
-                });
-              }
-            }}
-          />
-        )}
-      />
-    </>
+    <Feed
+      isLoading={loading}
+      onRefresh={refetch}
+      data={postsData?.posts || []}
+      renderItem={post => (
+        <Post
+          post={post}
+          onDomainPress={() => {
+            const domain = post.webAddress?.domain?.domain;
+            if (domain) handleDomainPress(domain);
+          }}
+          renderActions={() => (
+            <Actions
+              liked={post.liked}
+              likeCount={post._count?.likes || 0}
+              commentCount={post._count?.comments || 0}
+              onCommentsPress={() => handleCommentsPress(post.id)}
+              onLikePress={() => handleLikePress(post)}
+            />
+          )}
+        />
+      )}
+    />
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {ReactElement} from 'react';
 import {PostFieldsFragment} from '../../../__generated__/graphql';
 import View from '../../atoms/view/view';
 import {Image, Pressable, StyleSheet} from 'react-native';
@@ -8,23 +8,17 @@ import {Text, IconButton} from '../../atoms';
 import {Surface} from '../../atoms';
 import HeroScroll from './heroScroll';
 import {condense} from '../../../lib/url/url';
+import Actions from './actions/actions';
 
 interface Props {
   post: PostFieldsFragment;
-  onCommentsPress?: () => void;
-  onLikePress?: () => void;
   onDomainPress?: () => void;
   card?: boolean;
+  renderActions: () => ReactElement<typeof Actions>;
 }
 
 const Post = (props: Props) => {
-  const {
-    post,
-    onCommentsPress,
-    onLikePress,
-    onDomainPress,
-    card = true,
-  } = props;
+  const {post, onDomainPress, card = true, renderActions} = props;
   return (
     <Surface elevation={card ? 5 : 0} style={card ? styles.card : undefined}>
       <View style={card ? styles.content : undefined}>
@@ -60,32 +54,7 @@ const Post = (props: Props) => {
           </Pressable>
           <Text variant="bodyMedium">{post.title}</Text>
 
-          <View style={styles.actionsContainer}>
-            <View style={styles.action}>
-              <IconButton
-                style={styles.icon}
-                icon="chatbubbles"
-                size="S"
-                onPress={() => onCommentsPress?.()}
-              />
-              {post._count?.comments ? (
-                <Text variant="labelMedium">{post._count.comments}</Text>
-              ) : undefined}
-            </View>
-            <View style={styles.action}>
-              <IconButton
-                style={styles.icon}
-                icon="heart"
-                size="S"
-                onPress={() => onLikePress?.()}
-              />
-              {post._count?.likes ? (
-                <Text variant="labelMedium">{post._count?.likes}</Text>
-              ) : undefined}
-            </View>
-            <IconButton style={styles.icon} icon="compass" size="S" />
-            <IconButton style={styles.icon} icon="share" size="S" />
-          </View>
+          {renderActions()}
         </View>
       </View>
     </Surface>
@@ -105,11 +74,7 @@ Post.fragments = {
         icon
       }
     }
-    liked
-    _count {
-      comments
-      likes
-    }
+    ...ActionsFields
 }
 `),
 };
@@ -136,19 +101,6 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 2,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-  },
-  action: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-  },
-  icon: {
-    margin: 0,
   },
 });
 

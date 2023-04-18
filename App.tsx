@@ -24,7 +24,7 @@ import {
 import Main from './src/main';
 
 const client = new ApolloClient({
-  uri: 'http://localhost:4000',
+  uri: 'http://0.0.0.0:4000',
   cache: new InMemoryCache(),
 });
 

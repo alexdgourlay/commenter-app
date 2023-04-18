@@ -5,10 +5,10 @@ import {useMutation, useQuery} from '@apollo/client';
 import {HomeNavParamList, Routes} from '../index';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import AddComment from '../../../components/molecules/comment/addComment';
-import {StyleSheet} from 'react-native';
-import {Surface} from '../../../components/atoms';
+import {ScrollView, StyleSheet} from 'react-native';
+import {Surface, Text} from '../../../components/atoms';
 import Comment from '../../../components/molecules/comment/comment';
-import PostItem from '../../../components/molecules/post/post';
+import Chip from '../../../components/atoms/chip/chip';
 
 const GET_POST_SCREEN_DATA = gql(`
  query GetPostScreenData($postId: ID!) {
@@ -64,7 +64,13 @@ const Post = (props: Props) => {
 
   return (
     <Surface elevation={0}>
-      {data?.post && <PostItem post={data.post} card={false} />}
+      <Text>{data?.post?.webAddress?.hash}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <Chip icon="people">#labour</Chip>
+        <Chip icon="people">#conservatives</Chip>
+        <Chip icon="people">#BLM</Chip>
+        <Chip icon="people">#UKIP</Chip>
+      </ScrollView>
       <Surface elevation={0}>
         {data?.comments && (
           <Thread
@@ -82,7 +88,6 @@ const Post = (props: Props) => {
                 contentText: text,
                 postId,
               },
-              refetchQueries: [GET_POST_SCREEN_DATA],
             });
           }}
         />
@@ -93,12 +98,13 @@ const Post = (props: Props) => {
 
 const styles = StyleSheet.create({
   container: {},
+  chip: {
+    paddingRight: 6,
+  },
   thread: {},
   addComment: {
     paddingBottom: 4,
     width: '100%',
-    position: 'absolute',
-    bottom: 0,
   },
 });
 
